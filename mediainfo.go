@@ -136,7 +136,7 @@ func GetMediaInfo(fname string) (MediaInfo, error) {
 	audio := audio{}
 	menu := menu{}
 
-	if IsInstalled() {
+	if !IsInstalled() {
 		return info, fmt.Errorf("Must install mediainfo")
 	}
 	out, err := exec.Command(*mediainfoBinary, "--Output=XML", "-f", fname).Output()
