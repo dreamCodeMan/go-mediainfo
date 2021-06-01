@@ -12,45 +12,41 @@ var mediainfoBinary = flag.String("mediainfo-bin", "mediainfo", "the path to the
 
 type mediainfo struct {
 	XMLName xml.Name `xml:"MediaInfo"`
-	File    file     `xml:"media"`
+	Media    media     `xml:"media"`
+	FilePath string  `xml:"ref,attr"`
 }
 
 type track struct {
 	XMLName                   xml.Name `xml:"track"`
 	Type                      string   `xml:"type,attr"`
-	File_name                 string   `xml:"File_name"`
-	Format_Info               string   `xml:"Format_Info"`
-	Color_space               string   `xml:"Color_space"`
-	Complete_name             string   `xml:"Complete_name"`
-	Format_profile            string   `xml:"Format_profile"`
-	File_extension            string   `xml:"File_extension"`
-	Chroma_subsampling        string   `xml:"Chroma_subsampling"`
-	Writing_application       string   `xml:"Writing_application"`
-	Proportion_of_this_stream string   `xml:"Proportion_of_this_stream"`
+	FormatProfile            string   `xml:"Format_Profile"`
+	FileExtension            string   `xml:"FileExtension"`
+	ColorSpace               string   `xml:"ColorSpace"`
+	ChromaSubsampling        string   `xml:"ChromaSubsampling"`
+	EncodedApplication       string   `xml:"Encoded_Application"`
+	StreamSizeProportion string   `xml:"StreamSize_Proportion"`
 	Width                     []string `xml:"Width"`
 	Height                    []string `xml:"Height"`
 	Format                    []string `xml:"Format"`
 	Duration                  []string `xml:"Duration"`
-	Bit_rate                  []string `xml:"Bit_rate"`
-	Bit_depth                 []string `xml:"Bit_depth"`
-	Scan_type                 []string `xml:"Scan_type"`
-	File_size                 []string `xml:"File_size"`
-	Frame_rate                []string `xml:"Frame_rate"`
-	Channel_s_                []string `xml:"Channel_s_"`
-	Stream_size               []string `xml:"Stream_size"`
-	Interlacement             []string `xml:"Interlacement"`
-	Bit_rate_mode             []string `xml:"Bit_rate_mode"`
-	Sampling_rate             []string `xml:"Sampling_rate"`
-	Writing_library           []string `xml:"Writing_library"`
-	Frame_rate_mode           []string `xml:"Frame_rate_mode"`
-	Overall_bit_rate          []string `xml:"Overall_bit_rate"`
-	Display_aspect_ratio      []string `xml:"Display_aspect_ratio"`
-	Overall_bit_rate_mode     []string `xml:"Overall_bit_rate_mode"`
-	Format_settings__CABAC    []string `xml:"Format_settings__CABAC"`
-	Format_settings__ReFrames []string `xml:"Format_settings__ReFrames"`
+	BitRate                  []string `xml:"BitRate"`
+	BitDepth                 []string `xml:"BitDepth"`
+	ScanType                 []string `xml:"ScanType"`
+	FileSize                 []string `xml:"FileSize"`
+	FrameRate                []string `xml:"FrameRate"`
+	Channels                []string `xml:"Channels"`
+	StreamSize               []string `xml:"StreamSize"`
+	BitRateMode             []string `xml:"BitRate_Mode"`
+	SamplingRate             []string `xml:"SamplingRate"`
+	FrameRateMode           []string `xml:"FrameRate_Mode"`
+	OverallBitRate          []string `xml:"OverallBitRate"`
+	DisplayAspectRatio      []string `xml:"Display_aspect_ratio"`
+	OverallBitRateMode     []string `xml:"OverallBitRate_Mode"`
+	FormatSettingsCABAC    []string `xml:"Format_Settings_CABAC"`
+	FormatSettingsRefFrames []string `xml:"Format_Settings_RefFrames"`
 }
 
-type file struct {
+type media struct {
 	XMLName xml.Name `xml:"media"`
 	Tracks  []track  `xml:"track"`
 }
@@ -68,12 +64,9 @@ type general struct {
 	File_size             string `json:"file_size"`
 	Overall_bit_rate_mode string `json:"overall_bit_rate_mode"`
 	Overall_bit_rate      string `json:"overall_bit_rate"`
-	Complete_name         string `json:"complete_name"`
-	File_name             string `json:"file_name"`
 	File_extension        string `json:"file_extension"`
 	Frame_rate            string `json:"frame_rate"`
 	Stream_size           string `json:"stream_size"`
-	Writing_application   string `json:"writing_application"`
 }
 
 type video struct {
@@ -82,15 +75,12 @@ type video struct {
 	Format                    string `json:"format"`
 	Bit_rate                  string `json:"bitrate"`
 	Duration                  string `json:"duration"`
-	Format_Info               string `json:"format_info"`
 	Format_profile            string `json:"format_profile"`
 	Format_settings__CABAC    string `json:"format_settings_cabac"`
-	Format_settings__ReFrames string `json:"format_settings__reframes"`
+	Format_settings__ReFrames string `json:"format_settings_reframes"`
 	Frame_rate                string `json:"frame_rate"`
 	Bit_depth                 string `json:"bit_depth"`
 	Scan_type                 string `json:"scan_type"`
-	Interlacement             string `json:"interlacement"`
-	Writing_library           string `json:"writing_library"`
 }
 
 type audio struct {
@@ -99,7 +89,6 @@ type audio struct {
 	Bit_rate       string `json:"bitrate"`
 	Channel_s_     string `json:"channels"`
 	Frame_rate     string `json:"frame_rate"`
-	Format_Info    string `json:"format_Info"`
 	Sampling_rate  string `json:"sampling_rate"`
 	Format_profile string `json:"format_profile"`
 }
@@ -130,7 +119,7 @@ func (info MediaInfo) IsMedia() bool {
 
 func GetMediaInfo(fname string) (MediaInfo, error) {
 	info := MediaInfo{}
-	minfo := mediainfo{}
+	mInfo := mediainfo{}
 	general := general{}
 	video := video{}
 	audio := audio{}
@@ -144,50 +133,43 @@ func GetMediaInfo(fname string) (MediaInfo, error) {
 	if err != nil {
 		return info, err
 	}
-	fmt.Println("test deb1")
-	if err := xml.Unmarshal(out, &minfo); err != nil {
+	
+	if err := xml.Unmarshal(out, &mInfo); err != nil {
 		return info, err
 	}
 
-	for _, v := range minfo.File.Tracks {
+	for _, v := range mInfo.Media.Tracks {
 		if v.Type == "General" {
 			general.Duration = v.Duration[0]
 			general.Format = v.Format[0]
-			general.File_size = v.File_size[0]
-			if len(v.Overall_bit_rate_mode) > 0 {
-				general.Overall_bit_rate_mode = v.Overall_bit_rate_mode[0]
+			general.File_size = v.FileSize[0]
+			if len(v.OverallBitRateMode) > 0 {
+				general.Overall_bit_rate_mode = v.OverallBitRateMode[0]
 			}
-			general.Overall_bit_rate = v.Overall_bit_rate[0]
-			general.Complete_name = v.Complete_name
-			general.File_name = v.File_name
-			general.File_extension = v.File_extension
-			general.Frame_rate = v.Frame_rate[0]
-			general.Stream_size = v.Stream_size[0]
-			general.Writing_application = v.Writing_application
+			general.Overall_bit_rate = v.OverallBitRate[0]
+			general.File_extension = v.FileExtension
+			general.Frame_rate = v.FrameRate[0]
+			general.Stream_size = v.StreamSize[0]
 		} else if v.Type == "Video" {
 			video.Width = v.Width[0]
 			video.Height = v.Height[0]
 			video.Format = v.Format[0]
-			video.Bit_rate = v.Bit_rate[0]
+			video.Bit_rate = v.BitRate[0]
 			video.Duration = v.Duration[0]
-			video.Bit_depth = v.Bit_depth[0]
-			video.Scan_type = v.Scan_type[0]
-			video.Format_Info = v.Format_Info
-			video.Frame_rate = v.Frame_rate[0]
-			video.Format_profile = v.Format_profile
-			video.Interlacement = v.Interlacement[1]
-			video.Writing_library = v.Writing_library[0]
-			video.Format_settings__CABAC = v.Format_settings__CABAC[0]
-			video.Format_settings__ReFrames = v.Format_settings__ReFrames[0]
+			video.Bit_depth = v.BitDepth[0]
+			video.Scan_type = v.ScanType[0]
+			video.Frame_rate = v.FrameRate[0]
+			video.Format_profile = v.FormatProfile
+			video.Format_settings__CABAC = v.FormatSettingsCABAC[0]
+			video.Format_settings__ReFrames = v.FormatSettingsRefFrames[0]
 		} else if v.Type == "Audio" {
 			audio.Format = v.Format[0]
-			audio.Channel_s_ = v.Channel_s_[0]
+			audio.Channel_s_ = v.Channels[0]
 			audio.Duration = v.Duration[0]
-			audio.Bit_rate = v.Bit_rate[0]
-			audio.Format_Info = v.Format_Info
-			audio.Frame_rate = v.Frame_rate[0]
-			audio.Sampling_rate = v.Sampling_rate[0]
-			audio.Format_profile = v.Format_profile
+			audio.Bit_rate = v.BitRate[0]
+			audio.Frame_rate = v.FrameRate[0]
+			audio.Sampling_rate = v.SamplingRate[0]
+			audio.Format_profile = v.FormatProfile
 		} else if v.Type == "Menu" {
 			menu.Duration = v.Duration[0]
 			menu.Format = v.Format[0]
