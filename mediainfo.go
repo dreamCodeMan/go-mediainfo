@@ -12,7 +12,7 @@ var mediainfoBinary = flag.String("mediainfo-bin", "mediainfo", "the path to the
 
 type mediainfo struct {
 	XMLName xml.Name `xml:"MediaInfo"`
-	File    file     `xml:"File"`
+	File    file     `xml:"media"`
 }
 
 type track struct {
@@ -51,7 +51,7 @@ type track struct {
 }
 
 type file struct {
-	XMLName xml.Name `xml:"File"`
+	XMLName xml.Name `xml:"media"`
 	Tracks  []track  `xml:"track"`
 }
 
