@@ -11,7 +11,7 @@ import (
 var mediainfoBinary = flag.String("mediainfo-bin", "mediainfo", "the path to the mediainfo binary if it is not in the system $PATH")
 
 type mediainfo struct {
-	XMLName xml.Name `xml:"Mediainfo"`
+	XMLName xml.Name `xml:"MediaInfo"`
 	File    file     `xml:"File"`
 }
 
