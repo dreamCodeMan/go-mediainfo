@@ -144,7 +144,7 @@ func GetMediaInfo(fname string) (MediaInfo, error) {
 	if err != nil {
 		return info, err
 	}
-
+	fmt.Println("test deb1")
 	if err := xml.Unmarshal(out, &minfo); err != nil {
 		return info, err
 	}
